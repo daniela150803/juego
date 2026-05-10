@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratorio comparativo de IA | Gestión de proyectos</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #111c35;
+      --card: rgba(255, 255, 255, 0.08);
+      --card-strong: rgba(255, 255, 255, 0.14);
+      --line: rgba(255, 255, 255, 0.16);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --accent: #f97316;
+      --accent-2: #38bdf8;
+      --green: #22c55e;
+      --yellow: #facc15;
+      --red: #fb7185;
+      --purple: #a78bfa;
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(249, 115, 22, 0.26), transparent 32%),
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.22), transparent 34%),
+        linear-gradient(135deg, #0f172a 0%, #020617 100%);
+      min-height: 100vh;
+      padding: 32px;
+    }
+
+    .game-board {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.82));
+      border-radius: 32px;
+      padding: 36px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -90px;
+      top: -120px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.42), transparent 68%);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(249, 115, 22, 0.16);
+      border: 1px solid rgba(249, 115, 22, 0.4);
+      color: #fed7aa;
+      font-weight: 700;
+      letter-spacing: .04em;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      max-width: 880px;
+      font-size: clamp(34px, 5vw, 62px);
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+    }
+
+    .hero p {
+      max-width: 840px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 36px 0 16px;
+    }
+
+    .section-title .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(56, 189, 248, .16);
+      border: 1px solid rgba(56, 189, 248, .34);
+      font-size: 22px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -.04em;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 16px 42px rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+    }
+
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 21px;
+      letter-spacing: -.03em;
+    }
+
+    .card p,
+    .card li {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .chip {
+      display: inline-flex;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .team-card {
+      position: relative;
+      min-height: 180px;
+      padding: 20px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: linear-gradient(160deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+      overflow: hidden;
+    }
+
+    .team-card::after {
+      content: "";
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 999px;
+      right: -42px;
+      bottom: -42px;
+      background: var(--team-color);
+      opacity: .35;
+    }
+
+    .team-number {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: var(--team-color);
+      color: #020617;
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    .team-card h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .team-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mission {
+      border-radius: 22px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.075);
+    }
+
+    .mission .emoji {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .mission h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .mission p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .scoreboard {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 13px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    th {
+      background: rgba(255,255,255,.11);
+      color: #fff;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    td:first-child,
+    th:first-child {
+      text-align: left;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .score-input {
+      width: 52px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      border-radius: 12px;
+      padding: 8px;
+      text-align: center;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .total {
+      color: #fff;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .winner-box {
+      margin-top: 16px;
+      border-radius: 20px;
+      padding: 18px;
+      border: 1px solid rgba(34, 197, 94, .35);
+      background: rgba(34, 197, 94, .12);
+      color: #dcfce7;
+      font-weight: 800;
+    }
+
+    .prompt-box {
+      position: relative;
+      background: #020617;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 22px;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #dbeafe;
+      font-size: 13px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .copy-btn {
+      border: 0;
+      background: linear-gradient(135deg, var(--accent), #fb923c);
+      color: #111827;
+      font-weight: 900;
+      border-radius: 14px;
+      padding: 11px 14px;
+      cursor: pointer;
+      box-shadow: 0 12px 26px rgba(249,115,22,.28);
+      margin-bottom: 12px;
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .time-card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .time-card strong {
+      color: var(--accent-2);
+      font-size: 22px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .time-card span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 960px) {
+      body { padding: 18px; }
+      .stats, .team-grid, .mission-grid, .timeline, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .hero { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-board">
+    <section class="hero">
+      <span class="badge">🎮 Misión de clase · IA + Automatización + Data Analytics</span>
+      <h1>Laboratorio comparativo de gestión de proyectos con IA</h1>
+      <p>
+        Cada equipo usará una IA diferente para resolver el mismo caso. El objetivo no es obtener la respuesta más larga,
+        sino construir el mejor prompt, obtener una propuesta útil y defender cómo esa respuesta ayuda a planificar,
+        tomar decisiones, anticipar riesgos, automatizar tareas y medir resultados.
+      </p>
+
+      <div class="stats">
+        <div class="stat"><strong>4</strong><span>equipos en competencia</span></div>
+        <div class="stat"><strong>1</strong><span>caso creativo común</span></div>
+        <div class="stat"><strong>5</strong><span>criterios de puntuación</span></div>
+        <div class="stat"><strong>5 min</strong><span>duración aproximada</span></div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">🧩</div>
+      <h2>Equipos y herramientas</h2>
+    </div>
+
+    <section class="team-grid">
+      <article class="team-card" style="--team-color:#38bdf8">
+        <div class="team-number">1</div>
+        <h3>ChatGPT</h3>
+        <p>Planificación, estructura del proyecto, análisis, escenarios y toma de decisiones.</p>
+      </article>
+      <article class="team-card" style="--team-color:#22c55e">
+        <div class="team-number">2</div>
+        <h3>Gemini</h3>
+        <p>Documentos, reuniones, entorno Google, síntesis de información y seguimiento.</p>
+      </article>
+      <article class="team-card" style="--team-color:#facc15">
+        <div class="team-number">3</div>
+        <h3>Copilot / Planner</h3>
+        <p>Organización de tareas, productividad, responsables, fechas y monitoreo del avance.</p>
+      </article>
+      <article class="team-card" style="--team-color:#a78bfa">
+        <div class="team-number">4</div>
+        <h3>Claude</h3>
+        <p>Documentos estructurados, análisis crítico, comparación y entregables claros.</p>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">🚀</div>
+      <h2>Caso base: proyecto creativo</h2>
+    </div>
+
+    <section class="grid-2">
+      <article class="card">
+        <h3>Proyecto</h3>
+        <p><strong>Diseño y lanzamiento de una landing page interactiva</strong> para promocionar un evento universitario de innovación y tecnología.</p>
+        <h3>Contexto</h3>
+        <p>
+          Una universidad necesita una landing page para promocionar un evento. La página debe incluir información del evento,
+          formulario de inscripción, piezas gráficas, versión móvil, animaciones sencillas y conexión con una campaña en redes sociales.
+        </p>
+      </article>
+
+      <article class="card">
+        <h3>Restricciones del reto</h3>
+        <ul class="list">
+          <li><span class="chip">⏱️ Tiempo</span> Duración total: 4 semanas.</li>
+          <li><span class="chip">👥 Equipo</span> Líder de proyecto, diseñador gráfico, desarrollador web, copywriter y encargado de redes sociales.</li>
+          <li><span class="chip">🎯 Meta</span> Entregar una landing funcional, clara, medible y conectada con campaña digital.</li>
+        </ul>
+      </article>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">📦</div>
+      <h2>Entregables principales</h2>
+    </div>
+
+    <section class="mission-grid">
+      <article class="mission"><div class="emoji">🌐</div><h3>Landing page</h3><p>Página principal con información del evento, estructura clara y experiencia visual atractiva.</p></article>
+      <article class="mission"><div class="emoji">📝</div><h3>Formulario</h3><p>Formulario de inscripción funcional, simple y orientado a conversión.</p></article>
+      <article class="mission"><div class="emoji">🎨</div><h3>Piezas gráficas</h3><p>Recursos visuales para acompañar la campaña y mantener coherencia de marca.</p></article>
+      <article class="mission"><div class="emoji">📅</div><h3>Calendario</h3><p>Programación de publicaciones para redes sociales durante el lanzamiento.</p></article>
+      <article class="mission"><div class="emoji">📊</div><h3>Reporte final</h3><p>Resultados del proyecto, métricas relevantes y aprendizajes de mejora.</p></article>
+      <article class="mission"><div class="emoji">📱</div><h3>Versión móvil</h3><p>Adaptación responsive para garantizar buena experiencia desde celulares.</p></article>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">⚠️</div>
+      <h2>Riesgos posibles</h2>
+    </div>
+
+    <section class="mission-grid">
+      <article class="mission"><div class="emoji">⏳</div><h3>Aprobaciones lentas</h3><p>Retrasos por falta de respuesta o validación del cliente.</p></article>
+      <article class="mission"><div class="emoji">🎭</div><h3>Cambios de diseño</h3><p>Modificaciones de última hora que generan retrabajo.</p></article>
+      <article class="mission"><div class="emoji">📱</div><h3>Errores móviles</h3><p>Fallos de visualización o navegación en dispositivos móviles.</p></article>
+      <article class="mission"><div class="emoji">📉</div><h3>Baja conversión</h3><p>Pocas inscripciones a través del formulario.</p></article>
+      <article class="mission"><div class="emoji">🔥</div><h3>Sobrecarga</h3><p>Exceso de tareas concentradas en el diseñador gráfico.</p></article>
+      <article class="mission"><div class="emoji">❓</div><h3>Textos poco claros</h3><p>Falta de precisión en mensajes, secciones o llamados a la acción.</p></article>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">🏁</div>
+      <h2>Reto para cada equipo</h2>
+    </div>
+
+    <section class="card">
+      <h3>La misión</h3>
+      <p>
+        Cada equipo debe crear su propio prompt a partir del caso, consultar su IA asignada y generar una solución breve de gestión del proyecto.
+        No se entrega un prompt único: la calidad de la solicitud también hace parte del reto.
+      </p>
+      <div class="mission-grid">
+        <article class="mission"><div class="emoji">🗺️</div><h3>Plan general</h3><p>Fases, tareas, responsables y duración aproximada.</p></article>
+        <article class="mission"><div class="emoji">🧠</div><h3>Decisiones clave</h3><p>Qué debe decidir el equipo y con qué información.</p></article>
+        <article class="mission"><div class="emoji">🛡️</div><h3>Riesgos</h3><p>Riesgo, causa, impacto y respuesta.</p></article>
+        <article class="mission"><div class="emoji">⚙️</div><h3>Automatizaciones</h3><p>Qué tareas se pueden automatizar y para qué.</p></article>
+        <article class="mission"><div class="emoji">📈</div><h3>Indicadores</h3><p>Métricas para saber si el proyecto va bien.</p></article>
+        <article class="mission"><div class="emoji">⭐</div><h3>Recomendación final</h3><p>Qué debería priorizar el equipo para asegurar el éxito.</p></article>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">🧪</div>
+      <h2>Construye tu prompt</h2>
+    </div>
+
+    <section class="card">
+      <h3>Regla del reto</h3>
+      <p>
+        Cada equipo debe formular su propio prompt usando el caso base. Mientras más claro sea el prompt, mejor podrá responder la IA.
+        No se evalúa solo la herramienta: también se evalúa cómo el equipo guía, precisa y aterriza la solicitud.
+      </p>
+      <div class="mission-grid">
+        <article class="mission"><div class="emoji">🎯</div><h3>Rol</h3><p>Indiquen qué papel debe asumir la IA: gestor de proyectos, consultor, analista de riesgos o líder creativo.</p></article>
+        <article class="mission"><div class="emoji">📌</div><h3>Contexto</h3><p>Incluyan el tipo de proyecto, duración, equipo, entregables y restricciones principales.</p></article>
+        <article class="mission"><div class="emoji">🧭</div><h3>Objetivo</h3><p>Expliquen qué necesitan lograr: planificar, decidir prioridades, monitorear, automatizar o anticipar riesgos.</p></article>
+        <article class="mission"><div class="emoji">📦</div><h3>Salida esperada</h3><p>Pidan el formato de respuesta: tabla, fases, matriz de riesgos, lista de indicadores o recomendación ejecutiva.</p></article>
+        <article class="mission"><div class="emoji">⚖️</div><h3>Criterios</h3><p>Soliciten que la propuesta sea breve, aplicable, realista y útil para tomar decisiones.</p></article>
+        <article class="mission"><div class="emoji">🔍</div><h3>Mirada crítica</h3><p>Pidan que identifique supuestos, límites o datos que faltarían para decidir mejor.</p></article>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div class="icon">🏆</div>
+      <h2>Marcador rápido</h2>
+    </div>
+
+    <section class="card scoreboard">
+      <h3>Regla: gana el equipo que mejor use la IA, no el que obtenga la respuesta más larga.</h3>
+      <p>Asignen 1 punto si el criterio es claro, específico y aplicable. Dejen 0 si es muy general o no ayuda a tomar decisiones.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Equipo</th>
+            <th>Prompt</th>
+            <th>Plan</th>
+            <th>Riesgos</th>
+            <th>Automatización</th>
+            <th>Indicadores</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Equipo 1 · ChatGPT</td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td class="total">0</td>
+          </tr>
+          <tr>
+            <td>Equipo 2 · Gemini</td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td class="total">0</td>
+          </tr>
+          <tr>
+            <td>Equipo 3 · Copilot / Planner</td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td class="total">0</td>
+          </tr>
+          <tr>
+            <td>Equipo 4 · Claude</td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td><input class="score-input" type="number" min="0" max="1" value="0" /></td>
+            <td class="total">0</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="winner-box" id="winner">Aún no hay ganador. Ingresa los puntos para calcular el resultado.</div>
+    </section>
+  </main>
+
+  <script>
+    function copyPrompt() {
+      return;
+    }
+
+    const inputs = document.querySelectorAll('.score-input');
+    const winnerBox = document.getElementById('winner');
+
+    function clampScore(input) {
+      let value = Number(input.value);
+      if (Number.isNaN(value) || value < 0) value = 0;
+      if (value > 1) value = 1;
+      input.value = value;
+    }
+
+    function updateScores() {
+      const rows = document.querySelectorAll('tbody tr');
+      let bestScore = -1;
+      let winners = [];
+
+      rows.forEach((row) => {
+        const team = row.children[0].textContent.trim();
+        const rowInputs = row.querySelectorAll('.score-input');
+        let total = 0;
+
+        rowInputs.forEach((input) => {
+          clampScore(input);
+          total += Number(input.value);
+        });
+
+        row.querySelector('.total').textContent = total;
+
+        if (total > bestScore) {
+          bestScore = total;
+          winners = [team];
+        } else if (total === bestScore) {
+          winners.push(team);
+        }
+      });
+
+      if (bestScore <= 0) {
+        winnerBox.textContent = 'Aún no hay ganador. Ingresa los puntos para calcular el resultado.';
+      } else if (winners.length === 1) {
+        winnerBox.textContent = `🏆 Ganador: ${winners[0]} con ${bestScore}/5 puntos.`;
+      } else {
+        winnerBox.textContent = `⚔️ Empate con ${bestScore}/5 puntos: ${winners.join(' · ')}. Desempate: ¿cuál fue la decisión más importante que su IA ayudó a tomar?`;
+      }
+    }
+
+    inputs.forEach((input) => input.addEventListener('input', updateScores));
+
+    function copyPrompt() {
+      const text = document.getElementById('prompt').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const button = document.querySelector('.copy-btn');
+        const oldText = button.textContent;
+        button.textContent = '¡Prompt copiado!';
+        setTimeout(() => button.textContent = oldText, 1400);
+      });
+    }
+  </script>
+</body>
+</html>
